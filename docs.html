@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DeoLib — Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0c0c0e;
+    --bg2:      #111115;
+    --bg3:      #16161c;
+    --border:   rgba(255,255,255,0.06);
+    --border-hi:rgba(255,255,255,0.14);
+    --text:     #d4d4e0;
+    --muted:    #5a5a70;
+    --dim:      #3a3a50;
+    --accent:   #a78bfa;
+    --accent2:  #60a5fa;
+    --green:    #4ade80;
+    --orange:   #fb923c;
+    --pink:     #f472b6;
+    --yellow:   #fbbf24;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    border-right: 1px solid var(--border);
+    padding: 40px 0;
+    scrollbar-width: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+
+  .sidebar-logo {
+    padding: 0 24px 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .logo-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-tag {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav-group {
+    margin-bottom: 8px;
+    padding: 0 16px;
+  }
+
+  .nav-group-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding: 8px 8px 6px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12px;
+    transition: color 0.15s, background 0.15s;
+    cursor: pointer;
+  }
+
+  .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .nav-link.active { color: var(--accent); background: rgba(167,139,250,0.08); }
+
+  .nav-link::before {
+    content: '';
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    padding: 60px 64px 120px;
+    max-width: 860px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    margin-bottom: 72px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  .hero h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero p {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.8;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #0c0c0e;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border-hi);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+  /* ── SECTIONS ── */
+  .section {
+    margin-bottom: 64px;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section-anchor {
+    display: block;
+    position: relative;
+    top: -80px;
+    visibility: hidden;
+  }
+
+  .section-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .section h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .section p {
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.8;
+  }
+
+  /* ── METHOD CARDS ── */
+  .method {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .method:hover { border-color: var(--border-hi); }
+
+  .method-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .method-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent2);
+  }
+
+  .method-sig {
+    font-size: 12px;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .method-badge {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .method-badge.opt  { background: rgba(251,191,36,0.1);  color: var(--yellow); }
+  .method-badge.cfg  { background: rgba(74,222,128,0.1);  color: var(--green);  }
+  .method-badge.core { background: rgba(96,165,250,0.12); color: var(--accent2); }
+
+  .method-body {
+    border-top: 1px solid var(--border);
+    padding: 20px;
+  }
+
+  .method-desc {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+
+  /* ── PARAMS TABLE ── */
+  .params {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 12px;
+  }
+
+  .params th {
+    text-align: left;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .params td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    vertical-align: top;
+  }
+
+  .params td:first-child { color: var(--pink); font-weight: 500; }
+  .params td:nth-child(2) { color: var(--orange); }
+  .params td:last-child { color: var(--muted); }
+
+  .optional { opacity: 0.5; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 0.06em;
+  }
+
+  .copy-code {
+    font-size: 10px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .copy-code:hover { color: var(--text); }
+  .copy-code.copied { color: var(--green); }
+
+  pre {
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.7;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dim) transparent;
+  }
+
+  /* Syntax colors */
+  .kw  { color: var(--accent); }
+  .fn  { color: var(--accent2); }
+  .str { color: var(--green); }
+  .num { color: var(--orange); }
+  .cmt { color: var(--dim); font-style: italic; }
+  .var { color: var(--pink); }
+  .op  { color: var(--muted); }
+
+  /* ── INLINE CODE ── */
+  code {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: var(--accent2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── NOTE BOX ── */
+  .note {
+    background: rgba(167,139,250,0.05);
+    border: 1px solid rgba(167,139,250,0.15);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .note strong { color: var(--accent); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 40px 24px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-name">DeoLib</div>
+      <div class="logo-tag">UI Library for Roblox</div>
+    </div>
+
+    <nav>
+      <div class="nav-group">
+        <div class="nav-group-label">Getting Started</div>
+        <a class="nav-link active" href="#quickstart">Quick Start</a>
+        <a class="nav-link" href="#keysystem">Key System</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">API</div>
+        <a class="nav-link" href="#addtab">AddTab</a>
+        <a class="nav-link" href="#addsection">AddSection</a>
+        <a class="nav-link" href="#addtoggle">AddToggle</a>
+        <a class="nav-link" href="#addslider">AddSlider</a>
+        <a class="nav-link" href="#addmultiplier">AddMultiplier</a>
+        <a class="nav-link" href="#addtextbutton">AddTextButton</a>
+        <a class="nav-link" href="#addstatus">AddStatus</a>
+        <a class="nav-link" href="#addbind">AddBind</a>
+        <a class="nav-link" href="#adddivider">AddDivider</a>
+        <a class="nav-link" href="#notify">Notify</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Guides</div>
+        <a class="nav-link" href="#persistence">Config Persistence</a>
+        <a class="nav-link" href="#example">Full Example</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-badge">v2.0 — public release</div>
+      <h1>Build scripts<br>with <em>DeoLib</em></h1>
+      <p>A lightweight Roblox UI library that hooks into the native settings menu. Tabs, toggles, sliders, keybinds — all in a few lines of Lua.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#quickstart">Get Started</a>
+        <a class="btn-ghost" href="#example">View Example</a>
+      </div>
+    </div>
+
+    <!-- QUICK START -->
+    <div class="section">
+      <span class="section-anchor" id="quickstart"></span>
+      <div class="section-label">Getting Started</div>
+      <h2>Quick Start</h2>
+      <p>Load the library with <code>loadstring</code> and start adding tabs.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">lua</span>
+          <button class="copy-code" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="kw">local</span> <span class="var">Lib</span> <span class="op">=</span> <span class="fn">loadstring</span><span class="op">(</span><span class="var">game</span><span class="op">:</span><span class="fn">HttpGet</span><span class="op">(</span><span class="str">"YOUR_RAW_URL"</span><span class="op">))()</span>
+
+<span class="kw">local</span> <span class="var">main</span> <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddTab</span><span class="op">(</span><span class="str">"Main"</span><span class="op">)</span>
+
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddToggle</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"God Mode"</span><span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span>
+    <span class="fn">print</span><span class="op">(</span><span class="str">"God Mode:"</span><span class="op">,</span> <span class="var">v</span><span class="op">)</span>
+<span class="kw">end</span><span class="op">)</span></pre>
+      </div>
+
+      <div class="note" style="margin-top:16px">
+        <strong>Note:</strong> Open the menu with the Roblox menu button, then click the <strong>Lib</strong> tab at the top.
+      </div>
+    </div>
+
+    <!-- KEY SYSTEM -->
+    <div class="section">
+      <span class="section-anchor" id="keysystem"></span>
+      <div class="section-label">Getting Started</div>
+      <h2>Key System</h2>
+      <p>Optionally lock your script behind a key. Call <code>SetKeySystem</code> before adding any tabs.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">lua</span>
+          <button class="copy-code" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">SetKeySystem</span><span class="op">({</span>
+    <span class="var">formula</span>   <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="var">uid</span><span class="op">)</span> <span class="kw">return</span> <span class="var">uid</span> <span class="op">..</span> <span class="str">"-yourkey"</span> <span class="kw">end</span><span class="op">,</span>
+    <span class="var">portal</span>    <span class="op">=</span> <span class="str">"https://yoursite.netlify.app"</span><span class="op">,</span>  <span class="cmt">-- shown on key screen</span>
+    <span class="var">whitelist</span> <span class="op">=</span> <span class="str">"https://pastebin.com/raw/XXXXX"</span><span class="op">,</span> <span class="cmt">-- optional</span>
+<span class="op">})</span></pre>
+      </div>
+      <p style="margin-top:16px">If you skip <code>SetKeySystem</code> entirely, no key screen appears.</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ADD TAB -->
+    <div class="section">
+      <span class="section-anchor" id="addtab"></span>
+      <div class="section-label">API</div>
+      <h2>Methods</h2>
+
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddTab</span>
+          <span class="method-sig">(name) → frame</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Creates a new tab in the menu. Returns the tab frame — pass it into all other methods.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="kw">local</span> <span class="var">main</span>    <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddTab</span><span class="op">(</span><span class="str">"Main"</span><span class="op">)</span>
+<span class="kw">local</span> <span class="var">visuals</span> <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddTab</span><span class="op">(</span><span class="str">"Visuals"</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD SECTION -->
+      <span class="section-anchor" id="addsection"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddSection</span>
+          <span class="method-sig">(tab, text)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Adds a section header label inside a tab to group related elements.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">AddSection</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"PLAYER"</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD TOGGLE -->
+      <span class="section-anchor" id="addtoggle"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddToggle</span>
+          <span class="method-sig">(tab, label, default, callback, icon?)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Adds an on/off toggle. Use <code>AddToggleCfg</code> to auto-save the value.</p>
+          <table class="params">
+            <tr><th>param</th><th>type</th><th>description</th></tr>
+            <tr><td>tab</td><td>frame</td><td>Tab to add to</td></tr>
+            <tr><td>label</td><td>string</td><td>Display name</td></tr>
+            <tr><td>default</td><td>bool</td><td>Starting value</td></tr>
+            <tr><td>callback</td><td>function(v)</td><td>Called when toggled</td></tr>
+            <tr><td class="optional">icon</td><td class="optional">string?</td><td class="optional">Lucide icon name (optional)</td></tr>
+          </table>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">AddToggle</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Infinite Jump"</span><span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span>
+    <span class="cmt">-- v = true or false</span>
+<span class="kw">end</span><span class="op">)</span>
+
+<span class="cmt">-- auto-saves value across sessions</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddToggleCfg</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"God Mode"</span><span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span> <span class="kw">end</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD SLIDER -->
+      <span class="section-anchor" id="addslider"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddSlider</span>
+          <span class="method-sig">(tab, label, min, max, default, step, suffix, callback)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Adds a draggable slider. Returns a setter function to update the value programmatically.</p>
+          <table class="params">
+            <tr><th>param</th><th>type</th><th>description</th></tr>
+            <tr><td>min / max</td><td>number</td><td>Value range</td></tr>
+            <tr><td>default</td><td>number</td><td>Starting value</td></tr>
+            <tr><td>step</td><td>number</td><td>Snap increment e.g. <code>1</code> or <code>0.1</code></td></tr>
+            <tr><td>suffix</td><td>string</td><td>Unit label e.g. <code>" st"</code> or <code>""</code></td></tr>
+            <tr><td>callback</td><td>function(v)</td><td>Called on change</td></tr>
+          </table>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">AddSlider</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Walk Speed"</span><span class="op">,</span> <span class="num">8</span><span class="op">,</span> <span class="num">100</span><span class="op">,</span> <span class="num">16</span><span class="op">,</span> <span class="num">1</span><span class="op">,</span> <span class="str">" st"</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span>
+    <span class="var">game</span><span class="op">.</span><span class="var">Players</span><span class="op">.</span><span class="var">LocalPlayer</span><span class="op">.</span><span class="var">Character</span><span class="op">.</span><span class="var">Humanoid</span><span class="op">.</span><span class="var">WalkSpeed</span> <span class="op">=</span> <span class="var">v</span>
+<span class="kw">end</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD MULTIPLIER -->
+      <span class="section-anchor" id="addmultiplier"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddMultiplier</span>
+          <span class="method-sig">(tab, label, values, default, callback)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Segmented bar picker — lets the user pick from a fixed list of values. Great for presets.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">AddMultiplier</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"FOV"</span><span class="op">,</span> <span class="op">{</span><span class="num">70</span><span class="op">,</span> <span class="num">90</span><span class="op">,</span> <span class="num">110</span><span class="op">,</span> <span class="num">130</span><span class="op">},</span> <span class="num">90</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span>
+    <span class="var">game</span><span class="op">.</span><span class="var">Workspace</span><span class="op">.</span><span class="var">CurrentCamera</span><span class="op">.</span><span class="var">FieldOfView</span> <span class="op">=</span> <span class="var">v</span>
+<span class="kw">end</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD TEXT BUTTON -->
+      <span class="section-anchor" id="addtextbutton"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddTextButton</span>
+          <span class="method-sig">(tab, label, buttonText, callback, icon?)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">A row with a label on the left and a clickable button on the right.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">AddTextButton</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Respawn"</span><span class="op">,</span> <span class="str">"Go"</span><span class="op">,</span> <span class="kw">function</span><span class="op">()</span>
+    <span class="var">game</span><span class="op">.</span><span class="var">Players</span><span class="op">.</span><span class="var">LocalPlayer</span><span class="op">:</span><span class="fn">LoadCharacter</span><span class="op">()</span>
+<span class="kw">end</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD STATUS -->
+      <span class="section-anchor" id="addstatus"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddStatus</span>
+          <span class="method-sig">(tab, label, initial, icon?) → updater</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Read-only display row. Returns an updater function <code>fn(value, color?)</code> to change it live.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="kw">local</span> <span class="var">setHP</span> <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddStatus</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Health"</span><span class="op">,</span> <span class="str">"100"</span><span class="op">)</span>
+
+<span class="cmt">-- update it later</span>
+<span class="fn">setHP</span><span class="op">(</span><span class="str">"50"</span><span class="op">,</span> <span class="var">Color3</span><span class="op">.</span><span class="fn">fromRGB</span><span class="op">(</span><span class="num">255</span><span class="op">,</span> <span class="num">80</span><span class="op">,</span> <span class="num">80</span><span class="op">))</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD BIND -->
+      <span class="section-anchor" id="addbind"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddBind</span>
+          <span class="method-sig">(tab, label, default, callback)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Keybind row. User clicks the button then presses a key. Returns a getter function.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">AddBind</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Toggle ESP"</span><span class="op">,</span> <span class="var">Enum</span><span class="op">.</span><span class="var">KeyCode</span><span class="op">.</span><span class="var">X</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">key</span><span class="op">)</span>
+    <span class="fn">print</span><span class="op">(</span><span class="str">"Bound to"</span><span class="op">,</span> <span class="var">key</span><span class="op">.</span><span class="var">Name</span><span class="op">)</span>
+<span class="kw">end</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD DIVIDER -->
+      <span class="section-anchor" id="adddivider"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">AddDivider</span>
+          <span class="method-sig">(tab)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Adds a thin separator line between elements.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">AddDivider</span><span class="op">(</span><span class="var">main</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFY -->
+      <span class="section-anchor" id="notify"></span>
+      <div class="method">
+        <div class="method-header">
+          <span class="method-name">Notify</span>
+          <span class="method-sig">(title, text, duration?)</span>
+          <span class="method-badge core">core</span>
+        </div>
+        <div class="method-body">
+          <p class="method-desc">Sends a native Roblox notification popup.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="var">Lib</span><span class="op">:</span><span class="fn">Notify</span><span class="op">(</span><span class="str">"Loaded"</span><span class="op">,</span> <span class="str">"Script ready!"</span><span class="op">,</span> <span class="num">4</span><span class="op">)</span></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PERSISTENCE -->
+    <div class="section">
+      <span class="section-anchor" id="persistence"></span>
+      <div class="section-label">Guide</div>
+      <h2>Config Persistence</h2>
+      <p>The <code>Cfg</code> variants save values to <code>deolib_config.json</code> in the executor workspace and restore them automatically on next load.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+        <pre><span class="cmt">-- these remember their values across sessions</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddToggleCfg</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Auto Farm"</span><span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span> <span class="kw">end</span><span class="op">)</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddSliderCfg</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Speed"</span><span class="op">,</span> <span class="num">8</span><span class="op">,</span> <span class="num">100</span><span class="op">,</span> <span class="num">16</span><span class="op">,</span> <span class="num">1</span><span class="op">,</span> <span class="str">" st"</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span> <span class="kw">end</span><span class="op">)</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddMultiplierCfg</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"FOV"</span><span class="op">,</span> <span class="op">{</span><span class="num">70</span><span class="op">,</span> <span class="num">90</span><span class="op">,</span> <span class="num">110</span><span class="op">},</span> <span class="num">90</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span> <span class="kw">end</span><span class="op">)</span></pre>
+      </div>
+    </div>
+
+    <!-- FULL EXAMPLE -->
+    <div class="section">
+      <span class="section-anchor" id="example"></span>
+      <div class="section-label">Guide</div>
+      <h2>Full Example</h2>
+
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" onclick="copyCode(this)">copy</button></div>
+        <pre><span class="kw">local</span> <span class="var">Lib</span> <span class="op">=</span> <span class="fn">loadstring</span><span class="op">(</span><span class="var">game</span><span class="op">:</span><span class="fn">HttpGet</span><span class="op">(</span><span class="str">"YOUR_RAW_URL"</span><span class="op">))()</span>
+
+<span class="cmt">-- optional key system</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">SetKeySystem</span><span class="op">({</span>
+    <span class="var">formula</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="var">uid</span><span class="op">)</span> <span class="kw">return</span> <span class="var">uid</span> <span class="op">..</span> <span class="str">"-abc123"</span> <span class="kw">end</span><span class="op">,</span>
+    <span class="var">portal</span>  <span class="op">=</span> <span class="str">"https://yourportal.netlify.app"</span><span class="op">,</span>
+<span class="op">})</span>
+
+<span class="kw">local</span> <span class="var">main</span>    <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddTab</span><span class="op">(</span><span class="str">"Main"</span><span class="op">)</span>
+<span class="kw">local</span> <span class="var">visuals</span> <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddTab</span><span class="op">(</span><span class="str">"Visuals"</span><span class="op">)</span>
+<span class="kw">local</span> <span class="var">misc</span>    <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddTab</span><span class="op">(</span><span class="str">"Misc"</span><span class="op">)</span>
+
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddSection</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"PLAYER"</span><span class="op">)</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddToggleCfg</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"God Mode"</span><span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span> <span class="kw">end</span><span class="op">)</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddSliderCfg</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Walk Speed"</span><span class="op">,</span> <span class="num">8</span><span class="op">,</span> <span class="num">100</span><span class="op">,</span> <span class="num">16</span><span class="op">,</span> <span class="num">1</span><span class="op">,</span> <span class="str">" st"</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span>
+    <span class="var">game</span><span class="op">.</span><span class="var">Players</span><span class="op">.</span><span class="var">LocalPlayer</span><span class="op">.</span><span class="var">Character</span><span class="op">.</span><span class="var">Humanoid</span><span class="op">.</span><span class="var">WalkSpeed</span> <span class="op">=</span> <span class="var">v</span>
+<span class="kw">end</span><span class="op">)</span>
+
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddSection</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"ACTIONS"</span><span class="op">)</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddTextButton</span><span class="op">(</span><span class="var">main</span><span class="op">,</span> <span class="str">"Respawn"</span><span class="op">,</span> <span class="str">"Go"</span><span class="op">,</span> <span class="kw">function</span><span class="op">()</span>
+    <span class="var">game</span><span class="op">.</span><span class="var">Players</span><span class="op">.</span><span class="var">LocalPlayer</span><span class="op">:</span><span class="fn">LoadCharacter</span><span class="op">()</span>
+<span class="kw">end</span><span class="op">)</span>
+
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddSection</span><span class="op">(</span><span class="var">visuals</span><span class="op">,</span> <span class="str">"LIGHTING"</span><span class="op">)</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddToggle</span><span class="op">(</span><span class="var">visuals</span><span class="op">,</span> <span class="str">"Full Bright"</span><span class="op">,</span> <span class="kw">false</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">v</span><span class="op">)</span>
+    <span class="kw">local</span> <span class="var">L</span> <span class="op">=</span> <span class="var">game</span><span class="op">:</span><span class="fn">GetService</span><span class="op">(</span><span class="str">"Lighting"</span><span class="op">)</span>
+    <span class="var">L</span><span class="op">.</span><span class="var">Ambient</span> <span class="op">=</span> <span class="var">v</span> <span class="kw">and</span> <span class="var">Color3</span><span class="op">.</span><span class="fn">new</span><span class="op">(</span><span class="num">1</span><span class="op">,</span><span class="num">1</span><span class="op">,</span><span class="num">1</span><span class="op">)</span> <span class="kw">or</span> <span class="var">Color3</span><span class="op">.</span><span class="fn">new</span><span class="op">(</span><span class="num">0</span><span class="op">,</span><span class="num">0</span><span class="op">,</span><span class="num">0</span><span class="op">)</span>
+    <span class="var">L</span><span class="op">.</span><span class="var">GlobalShadows</span> <span class="op">=</span> <span class="kw">not</span> <span class="var">v</span>
+<span class="kw">end</span><span class="op">)</span>
+
+<span class="kw">local</span> <span class="var">setFPS</span> <span class="op">=</span> <span class="var">Lib</span><span class="op">:</span><span class="fn">AddStatus</span><span class="op">(</span><span class="var">visuals</span><span class="op">,</span> <span class="str">"FPS"</span><span class="op">,</span> <span class="str">"—"</span><span class="op">)</span>
+<span class="var">game</span><span class="op">:</span><span class="fn">GetService</span><span class="op">(</span><span class="str">"RunService"</span><span class="op">).</span><span class="var">Heartbeat</span><span class="op">:</span><span class="fn">Connect</span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="var">dt</span><span class="op">)</span>
+    <span class="fn">setFPS</span><span class="op">(</span><span class="var">math</span><span class="op">.</span><span class="fn">floor</span><span class="op">(</span><span class="num">1</span> <span class="op">/</span> <span class="var">dt</span><span class="op">))</span>
+<span class="kw">end</span><span class="op">)</span>
+
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddSection</span><span class="op">(</span><span class="var">misc</span><span class="op">,</span> <span class="str">"BINDS"</span><span class="op">)</span>
+<span class="var">Lib</span><span class="op">:</span><span class="fn">AddBind</span><span class="op">(</span><span class="var">misc</span><span class="op">,</span> <span class="str">"Toggle Menu"</span><span class="op">,</span> <span class="var">Enum</span><span class="op">.</span><span class="var">KeyCode</span><span class="op">.</span><span class="var">RightShift</span><span class="op">,</span> <span class="kw">function</span><span class="op">(</span><span class="var">key</span><span class="op">)</span> <span class="kw">end</span><span class="op">)</span>
+
+<span class="var">Lib</span><span class="op">:</span><span class="fn">Notify</span><span class="op">(</span><span class="str">"Loaded"</span><span class="op">,</span> <span class="str">"Script ready!"</span><span class="op">,</span> <span class="num">3</span><span class="op">)</span></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // Copy code button
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // Active nav link on scroll
+  const anchors = document.querySelectorAll('.section-anchor');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(l => {
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  anchors.forEach(a => observer.observe(a));
+</script>
+
+</body>
+</html>
